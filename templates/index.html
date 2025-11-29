@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 Intelligent SBI Form Filler</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-card {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        .input-section label {
+            display: block;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .input-section textarea {
+            width: 100%;
+            min-height: 300px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+
+        .input-section textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .input-hint {
+            margin-top: 10px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .input-hint strong {
+            color: #333;
+        }
+
+        .button-section {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .fill-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 50px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .fill-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .fill-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .status-section {
+            display: none;
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .status-section.loading {
+            display: block;
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+        }
+
+        .status-section.success {
+            display: block;
+            background: #d4edda;
+            border: 1px solid #28a745;
+        }
+
+        .status-section.error {
+            display: block;
+            background: #f8d7da;
+            border: 1px solid #dc3545;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .extracted-data {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .data-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .data-card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .data-card .field {
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        .data-card .field strong {
+            color: #555;
+            display: inline-block;
+            width: 120px;
+        }
+
+        .data-card .field span {
+            color: #333;
+        }
+
+        .download-button {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 15px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-top: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        .download-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.6);
+        }
+
+        .example-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f1f3f5;
+            border-radius: 8px;
+        }
+
+        .example-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .example-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .example-button {
+            background: white;
+            border: 2px solid #667eea;
+            color: #667eea;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .example-button:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .health-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            font-size: 0.85rem;
+        }
+
+        .health-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .health-dot.green {
+            background: #28a745;
+        }
+
+        .health-dot.red {
+            background: #dc3545;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .main-card {
+                padding: 20px;
+            }
+
+            .extracted-data {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="health-status" id="healthStatus">
+        <span class="health-dot red"></span>
+        Checking...
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Intelligent SBI Form Filler</h1>
+            <p>Powered by AI • Fill forms from any text input</p>
+        </div>
+
+        <div class="main-card">
+            <div class="input-section">
+                <label for="inputData">📝 Enter Your Details (Any Format)</label>
+                <textarea 
+                    id="inputData" 
+                    placeholder="Paste your details here in any format...
+
+Example:
+My name is Priya Singh, father Rajesh Singh, mother Sunita Singh
+Born 25/03/1995, female, married
+
+I live at B-204 Green Valley Apartments, Malviya Nagar
+Near Metro Station, New Delhi 110017
+Phone: 9876543210, email: priya.singh@gmail.com
+
+I work at Tech Solutions Pvt Ltd, A-15 Cyber City
+Sector 18, Gurgaon, Haryana 122015
+Office: 0124-4567890
+
+Branch: Connaught Place Delhi, Code: 12345
+PAN: ABCDE1234F, Indian citizen
+Regular customer, send correspondence to home"
+                ></textarea>
+                
+                <div class="input-hint">
+                    <strong>💡 Tip:</strong> Just paste your details in ANY format - the AI will understand and extract all information automatically!
+                </div>
+            </div>
+
+            <div class="example-section">
+                <h3>📋 Quick Examples</h3>
+                <div class="example-buttons">
+                    <button class="example-button" onclick="loadExample('structured')">Structured Format</button>
+                    <button class="example-button" onclick="loadExample('messy')">Messy Format</button>
+                    <button class="example-button" onclick="loadExample('minimal')">Minimal Info</button>
+                    <button class="example-button" onclick="clearInput()">Clear</button>
+                </div>
+            </div>
+
+            <div class="button-section">
+                <button class="fill-button" id="fillButton" onclick="fillForm()">
+                    ✨ Fill Form
+                </button>
+            </div>
+
+            <div class="status-section" id="statusSection"></div>
+        </div>
+    </div>
+
+    <script>
+        // Check health status
+        async function checkHealth() {
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                const healthEl = document.getElementById('healthStatus');
+                
+                if (data.ollama === 'connected' && data.model_llama3_1) {
+                    healthEl.innerHTML = '<span class="health-dot green"></span>AI Ready ✓';
+                } else if (data.ollama === 'connected') {
+                    healthEl.innerHTML = '<span class="health-dot red"></span>Model Missing';
+                } else {
+                    healthEl.innerHTML = '<span class="health-dot red"></span>Ollama Offline';
+                }
+            } catch (error) {
+                document.getElementById('healthStatus').innerHTML = '<span class="health-dot red"></span>Server Error';
+            }
+        }
+
+        // Load example data
+        function loadExample(type) {
+            const textarea = document.getElementById('inputData');
+            
+            if (type === 'structured') {
+                textarea.value = `Name: Amit Kumar Verma
+Father: Ramesh Kumar Verma
+Mother: Savita Devi
+DOB: 12/05/1988
+Gender: Male
+Status: Married
+
+Residential Address:
+Flat 501, Tower A, Lotus Apartments
+Near Phoenix Mall, Sector 21
+Noida, UP - 201301
+Phone: 0120-4567890
+Mobile: 9988776655
+Email: amit.verma@email.com
+
+Office Address:
+InfoTech Solutions India Pvt Ltd
+Building 3, DLF Cyber Park
+MG Road, Gurgaon, Haryana 122002
+Office Phone: 0124-6677889
+
+Bank: Nehru Place Delhi
+Branch Code: 54321
+PAN: CDEFG5678H
+Nationality: Indian
+Customer Type: Public
+Correspondence: Office`;
+            } else if (type === 'messy') {
+                textarea.value = `hi my name is rahul sharma born 20 june 1992
+dad suresh mom anjali, married male
+
+live in mumbai at 25 sea view apartments bandra west near linking road
+mumbai maharashtra 400050
+call me 022-26543210 or mobile 9988776655
+email rahul.s@email.com
+
+work digital solutions india ltd andheri east mumbai 400069
+office 022-66778899
+
+account at marine lines branch code 67890
+pan FGHIJ1234K indian
+staff member, send mails to office`;
+            } else if (type === 'minimal') {
+                textarea.value = `Priya Patel, father Kiran, mother Meera
+25/08/1993, female, unmarried
+
+Home: 123 Park Street, Pune 411001
+Mobile: 9876543210
+Email: priya@email.com
+
+Work: Tech Corp, Mumbai 400001
+
+PAN: ABCDE9876F`;
+            }
+        }
+
+        function clearInput() {
+            document.getElementById('inputData').value = '';
+        }
+
+        // Fill form function
+        async function fillForm() {
+            const inputText = document.getElementById('inputData').value.trim();
+            const statusSection = document.getElementById('statusSection');
+            const fillButton = document.getElementById('fillButton');
+            
+            if (!inputText) {
+                statusSection.className = 'status-section error';
+                statusSection.innerHTML = '<strong>❌ Error:</strong> Please enter some data first!';
+                return;
+            }
+            
+            // Show loading
+            fillButton.disabled = true;
+            fillButton.textContent = '⏳ Processing...';
+            statusSection.className = 'status-section loading';
+            statusSection.innerHTML = `
+                <div class="spinner"></div>
+                <div style="text-align: center;">
+                    <strong>🤖 AI is analyzing your input...</strong>
+                    <p>This may take 5-10 seconds</p>
+                </div>
+            `;
+            
+            try {
+                const response = await fetch('/api/fill-form', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ input_text: inputText })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to fill form');
+                }
+                
+                // Show success
+                statusSection.className = 'status-section success';
+                let html = `
+                    <div style="text-align: center;">
+                        <h2 style="color: #28a745; margin-bottom: 20px;">✅ Form Filled Successfully!</h2>
+                        <a href="${data.download_url}" class="download-button" download>
+                            📥 Download Filled PDF
+                        </a>
+                    </div>
+                `;
+                
+                // Display extracted data
+                if (data.extracted_data) {
+                    html += '<div class="extracted-data">';
+                    
+                    // Personal Details
+                    if (data.extracted_data.personal) {
+                        const p = data.extracted_data.personal;
+                        html += `
+                            <div class="data-card">
+                                <h3>👤 Personal Details</h3>
+                                ${p.full_name ? `<div class="field"><strong>Name:</strong> <span>${p.full_name}</span></div>` : ''}
+                                ${p.father_name ? `<div class="field"><strong>Father:</strong> <span>${p.father_name}</span></div>` : ''}
+                                ${p.mother_name ? `<div class="field"><strong>Mother:</strong> <span>${p.mother_name}</span></div>` : ''}
+                                ${p.date_of_birth ? `<div class="field"><strong>DOB:</strong> <span>${p.date_of_birth}</span></div>` : ''}
+                                ${p.gender ? `<div class="field"><strong>Gender:</strong> <span>${p.gender}</span></div>` : ''}
+                                ${p.marital_status ? `<div class="field"><strong>Status:</strong> <span>${p.marital_status}</span></div>` : ''}
+                            </div>
+                        `;
+                    }
+                    
+                    // Residential Address
+                    if (data.extracted_data.residential) {
+                        const r = data.extracted_data.residential;
+                        html += `
+                            <div class="data-card">
+                                <h3>🏠 Residential Address</h3>
+                                ${r.address_line1 ? `<div class="field"><strong>Line 1:</strong> <span>${r.address_line1}</span></div>` : ''}
+                                ${r.address_line2 ? `<div class="field"><strong>Line 2:</strong> <span>${r.address_line2}</span></div>` : ''}
+                                ${r.city ? `<div class="field"><strong>City:</strong> <span>${r.city}</span></div>` : ''}
+                                ${r.state ? `<div class="field"><strong>State:</strong> <span>${r.state}</span></div>` : ''}
+                                ${r.pincode ? `<div class="field"><strong>Pincode:</strong> <span>${r.pincode}</span></div>` : ''}
+                                ${r.mobile ? `<div class="field"><strong>Mobile:</strong> <span>${r.mobile}</span></div>` : ''}
+                                ${r.email_1 ? `<div class="field"><strong>Email:</strong> <span>${r.email_1}</span></div>` : ''}
+                            </div>
+                        `;
+                    }
+                    
+                    // Office Address
+                    if (data.extracted_data.office && data.extracted_data.office.city) {
+                        const o = data.extracted_data.office;
+                        html += `
+                            <div class="data-card">
+                                <h3>🏢 Office Address</h3>
+                                ${o.address_line1 ? `<div class="field"><strong>Line 1:</strong> <span>${o.address_line1}</span></div>` : ''}
+                                ${o.city ? `<div class="field"><strong>City:</strong> <span>${o.city}</span></div>` : ''}
+                                ${o.state ? `<div class="field"><strong>State:</strong> <span>${o.state}</span></div>` : ''}
+                                ${o.pincode ? `<div class="field"><strong>Pincode:</strong> <span>${o.pincode}</span></div>` : ''}
+                            </div>
+                        `;
+                    }
+                    
+                    // Bank Details
+                    if (data.extracted_data.bank) {
+                        const b = data.extracted_data.bank;
+                        html += `
+                            <div class="data-card">
+                                <h3>🏦 Bank & Identity</h3>
+                                ${b.branch ? `<div class="field"><strong>Branch:</strong> <span>${b.branch}</span></div>` : ''}
+                                ${b.code ? `<div class="field"><strong>Code:</strong> <span>${b.code}</span></div>` : ''}
+                                ${b.pan ? `<div class="field"><strong>PAN:</strong> <span>${b.pan}</span></div>` : ''}
+                                ${b.nationality ? `<div class="field"><strong>Nationality:</strong> <span>${b.nationality}</span></div>` : ''}
+                            </div>
+                        `;
+                    }
+                    
+                    html += '</div>';
+                }
+                
+                statusSection.innerHTML = html;
+                
+            } catch (error) {
+                statusSection.className = 'status-section error';
+                statusSection.innerHTML = `
+                    <h3 style="color: #dc3545; margin-bottom: 15px;">❌ Error</h3>
+                    <p><strong>Message:</strong> ${error.message}</p>
+                    <p style="margin-top: 15px; padding: 10px; background: white; border-radius: 4px;">
+                        <strong>💡 Troubleshooting:</strong><br>
+                        1. Make sure Ollama is running: <code>ollama serve</code><br>
+                        2. Check model is installed: <code>ollama pull llama3.1:8b-instruct-q8_0</code><br>
+                        3. Refresh the page and try again
+                    </p>
+                `;
+            } finally {
+                fillButton.disabled = false;
+                fillButton.textContent = '✨ Fill Form';
+            }
+        }
+
+        // Check health on page load
+        checkHealth();
+        setInterval(checkHealth, 10000); // Check every 10 seconds
+    </script>
+</body>
+</html>

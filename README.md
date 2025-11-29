@@ -1,28 +1,86 @@
 # SBI Account Opening Form - Automated PDF Filling Pipeline
 
-This pipeline provides pixel-perfect coordinate-based PDF form filling for the SBI Account Opening Form.
+This pipeline provides pixel-perfect coordinate-based PDF form filling for the SBI Account Opening Form with **AI-powered intelligent data extraction**.
 
 ## 📋 Overview
 
-The pipeline uses a coordinate-based approach where each form field's exact position is manually calibrated once and then used repeatedly for accurate form filling.
+The pipeline offers two modes:
+
+1. **🤖 Intelligent Mode (NEW)**: Uses Ollama + Llama 3.1 8B to parse raw/messy text input and automatically fill forms
+2. **⚙️ Manual Mode**: Uses pre-structured data with coordinate-based filling for pixel-perfect accuracy
+
+Both modes use the same calibrated coordinate system for reliable form filling.
 
 ## 🏗️ Project Structure
 
 ```
 Form filling pipeline 1/
 ├── 45679523-SBI-Account-Opening-Form-I (1)_removed.pdf  # Original blank form
+├── intelligent_form_filler.py            # 🤖 AI-powered form filler (NEW!)
 ├── step1_inspect_pdf.py                  # Inspect PDF dimensions & coordinate system
 ├── step2_generate_grid.py                # Generate grid overlay for coordinate reading
-├── step3_fill_form.py                    # Main form filling script
-├── step4_calibration_helper.py           # Helper for fine-tuning coordinates
+├── step4_fill_form.py                    # Manual form filling script
+├── step5_calibration_helper.py           # Helper for fine-tuning coordinates
 ├── layout_config.py                      # Coordinate mappings (SINGLE SOURCE OF TRUTH)
 ├── dummy_data.py                         # Test data generator
+├── sample_input.txt                      # Sample messy input for AI mode
+├── INTELLIGENT_FILLER_GUIDE.md           # 📖 Complete AI mode documentation
 └── README.md                             # This file
 ```
 
 ## 🚀 Quick Start
 
-### Prerequisites
+### 🤖 Option 1: Intelligent Mode (Recommended for End Users)
+
+**Use AI to parse raw text and fill forms automatically!**
+
+#### Prerequisites
+
+```bash
+# 1. Install Python dependencies
+pip install -r requirements.txt
+
+# 2. Install Ollama
+brew install ollama  # MacOS
+# or visit https://ollama.com for other platforms
+
+# 3. Start Ollama
+ollama serve
+
+# 4. Pull Llama 3.1 8B model
+ollama pull llama3.1:8b-instruct-q8_0
+```
+
+#### Usage
+
+```bash
+# Use sample input
+python3 intelligent_form_filler.py
+
+# Or use your own text file
+python3 intelligent_form_filler.py your_data.txt
+```
+
+**Input Example (any format works!):**
+```
+My name is Amit Kumar, father Ramesh, mother Sunita.
+Born 15/08/1990, male, married.
+Live at Flat 301, Sector 18, Noida 201301
+Phone: 9876543210, email: amit@email.com
+Work at ABC Solutions, Gurgaon 122002
+PAN: ABCDE1234F, Indian citizen
+Want account at CP Delhi branch
+```
+
+📖 **See [INTELLIGENT_FILLER_GUIDE.md](INTELLIGENT_FILLER_GUIDE.md) for complete documentation**
+
+---
+
+### ⚙️ Option 2: Manual Mode (For Developers/Advanced Users)
+
+**Use pre-structured data with calibrated coordinates**
+
+#### Prerequisites
 
 ```bash
 pip install PyMuPDF  # For PDF manipulation

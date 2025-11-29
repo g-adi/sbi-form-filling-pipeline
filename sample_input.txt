@@ -1,0 +1,23 @@
+My name is Amit Kumar Verma. Father's name: Ramesh Kumar Verma. Mother: Savita Devi.
+Born: 12-05-1988. Gender - Male. Status: Married
+
+Home: 
+Flat 501, Tower A, Lotus Apartments
+Near Phoenix Mall, Sector 21
+Noida, UP - 201301
+Phone: 0120-4567890, Mobile: 9988776655
+Email: amit.verma@email.com, amit.k.verma@company.com
+
+Work Address:
+InfoTech Solutions India Pvt Ltd
+Building 3, DLF Cyber Park
+MG Road, Gurgaon
+Haryana 122002
+Office: 0124-6677889
+Fax: 0124-6677890
+
+Bank: Nehru Place Delhi, Code: 54321
+PAN Number: CDEFG5678H
+Nationality: Indian
+
+I'm a public customer. Send correspondence to office address.

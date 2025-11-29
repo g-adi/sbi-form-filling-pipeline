@@ -3,6 +3,12 @@
 # PyMuPDF - PDF manipulation library
 PyMuPDF>=1.23.0
 
+# Ollama - LLM integration for intelligent form filling
+ollama>=0.1.0
+
+# Flask - Web framework for frontend
+Flask>=3.0.0
+
 # Alternative package name for PyMuPDF
 # (Both pip names install the same library - use either one)
 # fitz>=0.0.1.dev2
