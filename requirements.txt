@@ -1,0 +1,8 @@
+# PDF Form Filling Pipeline Requirements
+
+# PyMuPDF - PDF manipulation library
+PyMuPDF>=1.23.0
+
+# Alternative package name for PyMuPDF
+# (Both pip names install the same library - use either one)
+# fitz>=0.0.1.dev2
