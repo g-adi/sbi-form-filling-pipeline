@@ -3,6 +3,7 @@ Web Frontend for Intelligent SBI Form Filler
 Flask application with form input and PDF download
 """
 from flask import Flask, render_template, request, send_file, jsonify
+from werkzeug.utils import secure_filename
 import os
 import json
 from datetime import datetime
@@ -11,9 +12,16 @@ from step4_fill_form import PDFFormFiller
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+app.config['UPLOAD_FOLDER'] = 'uploads'
 
-# Create outputs directory
+# Create necessary directories
 os.makedirs('outputs', exist_ok=True)
+os.makedirs('uploads', exist_ok=True)
+
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'bmp'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 @app.route('/')
@@ -27,24 +35,21 @@ def fill_form():
     """
     API endpoint to process form input and generate filled PDF.
     
-    Expects JSON with 'input_text' field containing raw data.
+    Expects FormData with:
+    - 'input_text': Raw text data
+    - 'photograph': Optional image file
+    - 'signature': Optional image file
+    
     Returns JSON with extraction results and download URL.
     """
     try:
-        # Get input data
-        data = request.get_json()
-        if not data or 'input_text' not in data:
-            return jsonify({
-                'success': False,
-                'error': 'No input text provided'
-            }), 400
-        
-        raw_input = data['input_text'].strip()
+        # Get input data from form
+        raw_input = request.form.get('input_text', '').strip()
         
         if not raw_input:
             return jsonify({
                 'success': False,
-                'error': 'Input text is empty'
+                'error': 'No input text provided'
             }), 400
         
         print(f"\n{'='*60}")
@@ -66,7 +71,30 @@ def fill_form():
         # Step 2: Clean and validate data
         cleaned_data = clean_extracted_data(extracted_data)
         
-        # Step 3: Check for images
+        # Step 3: Handle uploaded images
+        timestamp_prefix = datetime.now().strftime('%Y%m%d_%H%M%S')
+        
+        # Handle photograph upload
+        if 'photograph' in request.files:
+            photograph = request.files['photograph']
+            if photograph and photograph.filename and allowed_file(photograph.filename):
+                filename = f'photograph_{timestamp_prefix}_{secure_filename(photograph.filename)}'
+                filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                photograph.save(filepath)
+                cleaned_data['photograph'] = filepath
+                print(f"✓ Saved photograph: {filepath}")
+        
+        # Handle signature upload
+        if 'signature' in request.files:
+            signature = request.files['signature']
+            if signature and signature.filename and allowed_file(signature.filename):
+                filename = f'signature_{timestamp_prefix}_{secure_filename(signature.filename)}'
+                filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                signature.save(filepath)
+                cleaned_data['signature'] = filepath
+                print(f"✓ Saved signature: {filepath}")
+        
+        # Fallback to default images if they exist
         if not cleaned_data.get('photograph') and os.path.exists('photograph.jpg'):
             cleaned_data['photograph'] = 'photograph.jpg'
         

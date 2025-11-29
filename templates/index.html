@@ -275,6 +275,95 @@
             background: #dc3545;
         }
 
+        .image-upload-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .image-upload-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .image-uploads {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .upload-box {
+            background: white;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-box:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .upload-box.has-file {
+            border-color: #28a745;
+            border-style: solid;
+        }
+
+        .upload-box input[type="file"] {
+            display: none;
+        }
+
+        .upload-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .upload-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .upload-hint {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .image-preview {
+            margin-top: 10px;
+            max-width: 150px;
+            max-height: 150px;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .image-preview.show {
+            display: block;
+            margin: 10px auto;
+        }
+
+        .remove-image {
+            margin-top: 10px;
+            padding: 5px 15px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: none;
+        }
+
+        .remove-image.show {
+            display: inline-block;
+        }
+
         @media (max-width: 768px) {
             .header h1 {
                 font-size: 1.8rem;
@@ -328,6 +417,29 @@ Regular customer, send correspondence to home"
                 
                 <div class="input-hint">
                     <strong>💡 Tip:</strong> Just paste your details in ANY format - the AI will understand and extract all information automatically!
+                </div>
+            </div>
+
+            <div class="image-upload-section">
+                <h3>📷 Upload Images (Optional)</h3>
+                <div class="image-uploads">
+                    <div class="upload-box" id="photographBox" onclick="document.getElementById('photographInput').click()">
+                        <div class="upload-icon">📸</div>
+                        <div class="upload-label">Photograph</div>
+                        <div class="upload-hint">Click to upload<br>JPG, PNG (max 5MB)</div>
+                        <input type="file" id="photographInput" accept="image/*" onchange="handleImageUpload(event, 'photograph')">
+                        <img id="photographPreview" class="image-preview" />
+                        <button class="remove-image" id="photographRemove" onclick="event.stopPropagation(); removeImage('photograph')">Remove</button>
+                    </div>
+                    
+                    <div class="upload-box" id="signatureBox" onclick="document.getElementById('signatureInput').click()">
+                        <div class="upload-icon">✍️</div>
+                        <div class="upload-label">Signature</div>
+                        <div class="upload-hint">Click to upload<br>JPG, PNG (max 5MB)</div>
+                        <input type="file" id="signatureInput" accept="image/*" onchange="handleImageUpload(event, 'signature')">
+                        <img id="signaturePreview" class="image-preview" />
+                        <button class="remove-image" id="signatureRemove" onclick="event.stopPropagation(); removeImage('signature')">Remove</button>
+                    </div>
                 </div>
             </div>
 
@@ -436,6 +548,75 @@ PAN: ABCDE9876F`;
             document.getElementById('inputData').value = '';
         }
 
+        // Global variables to store uploaded images
+        let uploadedPhotograph = null;
+        let uploadedSignature = null;
+
+        // Handle image upload
+        function handleImageUpload(event, type) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Validate file size (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('File size must be less than 5MB');
+                event.target.value = '';
+                return;
+            }
+
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                alert('Please upload an image file');
+                event.target.value = '';
+                return;
+            }
+
+            // Store the file
+            if (type === 'photograph') {
+                uploadedPhotograph = file;
+            } else if (type === 'signature') {
+                uploadedSignature = file;
+            }
+
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const previewId = type + 'Preview';
+                const boxId = type + 'Box';
+                const removeId = type + 'Remove';
+                
+                document.getElementById(previewId).src = e.target.result;
+                document.getElementById(previewId).classList.add('show');
+                document.getElementById(boxId).classList.add('has-file');
+                document.getElementById(removeId).classList.add('show');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Remove uploaded image
+        function removeImage(type) {
+            const inputId = type + 'Input';
+            const previewId = type + 'Preview';
+            const boxId = type + 'Box';
+            const removeId = type + 'Remove';
+
+            // Clear the input
+            document.getElementById(inputId).value = '';
+            
+            // Hide preview
+            document.getElementById(previewId).classList.remove('show');
+            document.getElementById(previewId).src = '';
+            document.getElementById(boxId).classList.remove('has-file');
+            document.getElementById(removeId).classList.remove('show');
+
+            // Clear stored file
+            if (type === 'photograph') {
+                uploadedPhotograph = null;
+            } else if (type === 'signature') {
+                uploadedSignature = null;
+            }
+        }
+
         // Fill form function
         async function fillForm() {
             const inputText = document.getElementById('inputData').value.trim();
@@ -461,12 +642,21 @@ PAN: ABCDE9876F`;
             `;
             
             try {
+                // Prepare form data with images
+                const formData = new FormData();
+                formData.append('input_text', inputText);
+                
+                // Add images if uploaded
+                if (uploadedPhotograph) {
+                    formData.append('photograph', uploadedPhotograph);
+                }
+                if (uploadedSignature) {
+                    formData.append('signature', uploadedSignature);
+                }
+                
                 const response = await fetch('/api/fill-form', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ input_text: inputText })
+                    body: formData
                 });
                 
                 const data = await response.json();
